@@ -1,0 +1,246 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%%
+%%
+%%
+%% Abstract:
+%%   Example Embedded Coder custom file processing template.
+%%
+%%   Note: This file can contain any valid TLC code, which Embedded Coder
+%%   executes just prior to writing the generated source files to disk.
+%%   Using this template "hook" file, you are able to augment the generated
+%%   source code and create additional files.
+%%
+%% Copyright 1994-2010 The MathWorks, Inc.
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%selectfile NULL_FILE
+
+%%  Uncomment this TLC line to execute the example
+%%   ||   ||
+%%   ||   ||
+%%   \/   \/
+%assign ERTCustomFileTest = TLC_TRUE
+
+%if EXISTS("ERTCustomFileTest") && ERTCustomFileTest == TLC_TRUE
+
+  %% Add a new C file simModel.c and put a simple function in it
+  %assign mdlName = LibGetModelName()
+  %assign cFile = LibCreateSourceFile("Source", "Custom", "%<mdlName>Model")
+
+  %openfile typesBuf
+
+  #include "rtwtypes.h"
+#include <math.h>
+
+#include "FreeRTOS.h"
+#include "task.h"
+
+#include "system.h"
+#include "log.h"
+#include "param.h"
+#include "sensors.h"
+#include "commander.h"
+#include "motors.h"
+#include "%<mdlName>.h"
+
+  %closefile typesBuf
+
+  %<LibSetSourceFileSection(cFile,"Includes",typesBuf)>
+
+  %openfile tmpBuf
+
+  static void %<mdlName>ModelTask(void* param);
+
+  static bool isInit;
+  static sensorData_t sensorData;
+  static setpoint_t setpoint;
+  static state_t state;
+  static float l1, l2, l3, l4, l5, l6;
+  static uint16_t m1, m2, m3, m4;
+
+
+  void %<mdlName>ModelInit(void)
+  {
+    if(isInit)
+      return;
+
+     %<LibCallModelInitialize()>
+
+     sensorsInit();
+     motorsInit(motorMapDefaultBrushed);
+     #if defined(SITAW_ENABLED)
+        sitAwInit();
+     #endif
+     xTaskCreate(%<mdlName>ModelTask, "%<mdlName>Model",
+                /*Set Stack Size*/ 5*configMINIMAL_STACK_SIZE, NULL, /*Set Prio*/ 4, NULL);
+
+    isInit = true;
+  }
+
+    bool %<mdlName>ModelTest(void)
+    {
+      bool pass = true;
+      pass &= sensorsTest();
+      pass &= motorsTest();
+      return pass;
+    }
+
+static void %<mdlName>ModelTask(void* param)
+{
+  uint32_t tick = 0;
+  uint32_t lastWakeTime;
+
+  //Wait for the system to be fully started to start stabilization loop
+  systemWaitStart();
+
+  // Wait for sensors to be calibrated
+  lastWakeTime = xTaskGetTickCount ();
+  while(!sensorsAreCalibrated()) {
+    vTaskDelayUntil(&lastWakeTime, M2T(%<FundamentalStepSize*1000>));
+  }
+
+  while(1) {
+    vTaskDelayUntil(&lastWakeTime, M2T(%<FundamentalStepSize*1000>));
+
+    sensorsAcquire(&sensorData, tick);
+    commanderGetSetpoint(&setpoint, &state);
+
+    rtU.Acc_x = sensorData.acc.x;
+    rtU.Acc_y = sensorData.acc.y;
+    rtU.Acc_z = sensorData.acc.z;
+
+    rtU.Gyro_x = sensorData.gyro.x;
+    rtU.Gyro_y = sensorData.gyro.y;
+    rtU.Gyro_z = sensorData.gyro.z;
+
+    rtU.Base_Thrust = setpoint.thrust;
+    rtU.Ref_Roll = setpoint.attitude.roll;
+    rtU.Ref_Pitch = setpoint.attitude.pitch;
+    rtU.Ref_YawRate = setpoint.attitudeRate.yaw;
+
+    //DEBUG_PRINT("Acc Y: %f\n", sensorData.acc.y);
+
+		%<LibCallModelStep(0)>
+
+
+    l1 = rtY.Log1;
+    l2 = rtY.Log2;
+    l3 = rtY.Log3;
+    l4 = rtY.Log4;
+    l5 = rtY.Log5;
+    l6 = rtY.Log6;
+    m1 = (uint16_t)rtY.Motor_1;
+    m2 = (uint16_t)rtY.Motor_2;
+    m3 = (uint16_t)rtY.Motor_3;
+    m4 = (uint16_t)rtY.Motor_4;
+
+    motorsSetRatio(MOTOR_M1, m1);
+    motorsSetRatio(MOTOR_M2, m2);
+    motorsSetRatio(MOTOR_M3, m3);
+    motorsSetRatio(MOTOR_M4, m4);
+
+    tick++;
+  }
+}
+
+LOG_GROUP_START(acc)
+LOG_ADD(LOG_FLOAT, x, &sensorData.acc.x)
+LOG_ADD(LOG_FLOAT, y, &sensorData.acc.y)
+LOG_ADD(LOG_FLOAT, z, &sensorData.acc.z)
+LOG_GROUP_STOP(acc)
+
+LOG_GROUP_START(baro)
+LOG_ADD(LOG_FLOAT, asl, &sensorData.baro.asl)
+LOG_ADD(LOG_FLOAT, temp, &sensorData.baro.temperature)
+LOG_ADD(LOG_FLOAT, pressure, &sensorData.baro.pressure)
+LOG_GROUP_STOP(baro)
+
+LOG_GROUP_START(gyro)
+LOG_ADD(LOG_FLOAT, x, &sensorData.gyro.x)
+LOG_ADD(LOG_FLOAT, y, &sensorData.gyro.y)
+LOG_ADD(LOG_FLOAT, z, &sensorData.gyro.z)
+LOG_GROUP_STOP(gyro)
+
+LOG_GROUP_START(mag)
+LOG_ADD(LOG_FLOAT, x, &sensorData.mag.x)
+LOG_ADD(LOG_FLOAT, y, &sensorData.mag.y)
+LOG_ADD(LOG_FLOAT, z, &sensorData.mag.z)
+LOG_GROUP_STOP(mag)
+
+LOG_GROUP_START(motor)
+LOG_ADD(LOG_UINT16, m1, &m1)
+LOG_ADD(LOG_UINT16, m2, &m2)
+LOG_ADD(LOG_UINT16, m3, &m3)
+LOG_ADD(LOG_UINT16, m4, &m4)
+LOG_GROUP_STOP(motor)
+
+LOG_GROUP_START(simulink)
+LOG_ADD(LOG_FLOAT, log_1, &l1)
+LOG_ADD(LOG_FLOAT, log_2, &l2)
+LOG_ADD(LOG_FLOAT, log_3, &l3)
+LOG_ADD(LOG_FLOAT, log_4, &l4)
+LOG_ADD(LOG_FLOAT, log_5, &l5)
+LOG_ADD(LOG_FLOAT, log_6, &l6)
+LOG_GROUP_STOP(simulink)
+  %closefile tmpBuf
+
+  %<LibSetSourceFileSection(cFile,"Functions",tmpBuf)>
+
+  %% Add a corresponding H file timestwo.h
+
+  %assign hFile = LibCreateSourceFile("Header", "Custom", "%<mdlName>Model")
+
+  %openfile tmpBuf
+#include <stdbool.h>
+#include <stdint.h>
+
+void %<mdlName>ModelInit(void);
+
+bool %<mdlName>ModelTest(void);
+  %closefile tmpBuf
+
+  %%<LibSetSourceFileSection(hFile,"Includes",typesBuf)>
+  %<LibSetSourceFileSection(hFile,"Declarations",tmpBuf)>
+
+  %% Add a #define to the model's public header file model.h
+
+%%  %assign pubName = LibGetMdlPubHdrBaseName()
+%%  %assign modelH  = LibCreateSourceFile("Header", "Simulink", pubName)
+
+%%  %openfile tmpBuf
+%%Add includes depending on custom blocks
+%%  #define ACCELERATION 9.81
+
+%%  %closefile tmpBuf
+
+%%  %<LibSetSourceFileSection(modelH,"Defines",tmpBuf)>
+
+  %% Add a #define to the model's private header file model_private.h
+
+%%  %assign prvName  = LibGetMdlPrvHdrBaseName()
+%%  %assign privateH = LibCreateSourceFile("Header", "Simulink", prvName)
+
+%%  %openfile tmpBuf
+
+%%  #define STARTING_POINT 100.0
+
+%%  %closefile tmpBuf
+
+%%  %<LibSetSourceFileSection(privateH,"Defines",tmpBuf)>
+
+  %% Add a #include to the model's C file model.c
+
+%%  %assign srcName = LibGetMdlSrcBaseName()
+%%  %assign modelC  = LibCreateSourceFile("Source", "Simulink", srcName)
+
+
+%%  %openfile tmpBuf
+%%  /* #include "mytables.h" */
+%%  %closefile tmpBuf
+
+%%  %<LibSetSourceFileSection(modelC,"Includes",tmpBuf)>
+
+  %% Create a simple main.  Files are located in MATLAB/rtw/c/tlc/mw.
+
+%endif

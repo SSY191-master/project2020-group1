@@ -237,6 +237,9 @@ endif
 # Libs
 PROJ_OBJ += libarm_math.a
 
+# Code Generation
+PROJ_OBJ += crazyflie.o crazyflieModel.o
+
 OBJ = $(FREERTOS_OBJ) $(PORT_OBJ) $(ST_OBJ) $(PROJ_OBJ) $(CRT0)
 
 ############### Compilation configuration ################
@@ -270,8 +273,8 @@ ifeq ($(DEBUG), 1)
   # Prevent silent errors when converting between types (requires explicit casting)
   CFLAGS += -Wconversion
 else
-	# Fail on warnings
-  CFLAGS += -Os -g3 -Werror
+	# Fail on warnings -- no, matlab will generate code that procude warnings
+  CFLAGS += -Os -g3 # -Werror
 endif
 
 ifeq ($(LTO), 1)
@@ -293,7 +296,7 @@ CFLAGS += -Wdouble-promotion
 
 
 ASFLAGS = $(PROCESSOR) $(INCLUDES)
-LDFLAGS = --specs=nosys.specs --specs=nano.specs $(PROCESSOR) -Wl,-Map=$(PROG).map,--cref,--gc-sections,--undefined=uxTopUsedPriority 
+LDFLAGS = --specs=nosys.specs --specs=nano.specs $(PROCESSOR) -Wl,-Map=$(PROG).map,--cref,--gc-sections,--undefined=uxTopUsedPriority
 
 #Flags required by the ST library
 ifeq ($(CLOAD), 1)
@@ -327,7 +330,13 @@ endif
 #################### Targets ###############################
 
 
-all: check_submodules build
+all: check_submodules move build
+
+# code generation
+move:
+	bash -c "cp -r simulink-model/crazyflie_ert_rtw/*.h src/modules/interface/ && cp -r simulink-model/crazyflie_ert_rtw/*.c src/modules/src/"
+
+
 build:
 # Each target is in a different line, so they are executed one after the other even when the processor has multiple cores (when the -j option for the make command is > 1). See: https://www.gnu.org/software/make/manual/html_node/Parallel.html
 	@$(MAKE) --no-print-directory clean_version

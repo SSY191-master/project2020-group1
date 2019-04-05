@@ -64,6 +64,10 @@
 #include "deck.h"
 #include "extrx.h"
 
+// Code generation
+#include "crazyflieModel.h"
+
+
 /* Private variable */
 static bool selftestPassed;
 static bool canFly;
@@ -163,7 +167,9 @@ void systemTask(void *arg)
   StateEstimatorType estimator = anyEstimator;
   deckInit();
   estimator = deckGetRequiredEstimator();
-  stabilizerInit(estimator);
+//  stabilizerInit(estimator);
+  crazyflieModelInit();
+
   if (deckGetRequiredLowInterferenceRadioMode() && platformConfigPhysicalLayoutAntennasAreClose())
   {
     platformSetLowInterferenceRadioMode();
@@ -180,7 +186,7 @@ void systemTask(void *arg)
   pass &= configblockTest();
   pass &= commTest();
   pass &= commanderTest();
-  pass &= stabilizerTest();
+//  pass &= stabilizerTest();
   pass &= deckTest();
   pass &= soundTest();
   pass &= memTest();

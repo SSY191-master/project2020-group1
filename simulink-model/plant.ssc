@@ -1,0 +1,56 @@
+component plant
+%Plant of quadrocopter
+
+inputs
+   ctrl={[0;0;0;0],'N'}; %Thrust:left
+end
+
+outputs
+    pos={[0;0;0],'m'}; %Position:right
+    v = {[0;0;0], 'm/s' }; %Velocity:right
+    a = {[0;0;0], 'm/s^2' }; %Acceleration:right
+    
+    angle = {[0;0;0],'rad'};%Angle:right
+    w = {[0;0;0],'rad/s'};%Angular velocity:right
+end
+
+parameters
+    m = {0.027,'kg'};%Mass
+    g = {9.81,'m/s^2'};%Gravity
+    d = {0.046,'m'};%Arm length
+    k = {1.9796e-9,'1'};%Lift constant
+    b = {2.5383e-11,'1'};%Drag constant
+end
+
+parameters(Access=private)    
+    %Moment of inertia matrix
+    Jx = {1.1463e-5,'kg*m^2'};
+    Jy = {1.6993e-5,'kg*m^2'};
+    Jz = {2.9944e-5,'kg*m^2'};
+    J = [Jx,0,0;0,Jy,0;0,0,Jz];
+
+    % Add time invariant parameters here 
+
+end
+
+variables(Access=private)
+    
+    % Add time variant variables here
+
+end
+
+equations
+
+    % Add all equations here 
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % REPLACE/REMOVE ALL THESE EQUATIONS
+    pos == {[0;0;0],'m'};
+    v == {[0;0;0], 'm/s' };
+    a == {[0;0;0], 'm/s^2' };
+    angle == {[0;0;0],'rad'};
+    w == {[0;0;0],'rad/s'};
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+end
+end
