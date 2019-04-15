@@ -238,7 +238,7 @@ endif
 PROJ_OBJ += libarm_math.a
 
 # Code Generation
-PROJ_OBJ += crazyflie.o crazyflieModel.o
+PROJ_OBJ += crazyflie.o crazyflieModel.o crazyflie_data.o
 
 OBJ = $(FREERTOS_OBJ) $(PORT_OBJ) $(ST_OBJ) $(PROJ_OBJ) $(CRT0)
 
