@@ -59,6 +59,9 @@
   static float l1, l2, l3, l4, l5, l6;
   static uint16_t m1, m2, m3, m4;
 
+#include "deck.h"
+#include "pmw3901.h"
+motionBurst_t currentMotion;
 
   void %<mdlName>ModelInit(void)
   {
@@ -106,34 +109,40 @@ static void %<mdlName>ModelTask(void* param)
     sensorsAcquire(&sensorData, tick);
     commanderGetSetpoint(&setpoint, &state);
 
-    rtU.Acc_x = sensorData.acc.x;
-    rtU.Acc_y = sensorData.acc.y;
-    rtU.Acc_z = sensorData.acc.z;
+    pmw3901ReadMotion(DECK_GPIO_IO3, &currentMotion);
+    int16_t accpx = -currentMotion.deltaY;
+    int16_t accpy = -currentMotion.deltaX;
+    %<mdlName>_U.Flow_x = accpx;
+    %<mdlName>_U.Flow_y = accpy;
 
-    rtU.Gyro_x = sensorData.gyro.x;
-    rtU.Gyro_y = sensorData.gyro.y;
-    rtU.Gyro_z = sensorData.gyro.z;
+    %<mdlName>_U.Acc_x = sensorData.acc.x;
+    %<mdlName>_U.Acc_y = sensorData.acc.y;
+    %<mdlName>_U.Acc_z = sensorData.acc.z;
 
-    rtU.Base_Thrust = setpoint.thrust;
-    rtU.Ref_Roll = setpoint.attitude.roll;
-    rtU.Ref_Pitch = setpoint.attitude.pitch;
-    rtU.Ref_YawRate = setpoint.attitudeRate.yaw;
+    %<mdlName>_U.Gyro_x = sensorData.gyro.x;
+    %<mdlName>_U.Gyro_y = sensorData.gyro.y;
+    %<mdlName>_U.Gyro_z = sensorData.gyro.z;
+
+    %<mdlName>_U.Base_Thrust = setpoint.thrust;
+    %<mdlName>_U.Ref_Roll = setpoint.attitude.roll;
+    %<mdlName>_U.Ref_Pitch = setpoint.attitude.pitch;
+    %<mdlName>_U.Ref_YawRate = setpoint.attitudeRate.yaw;
 
     //DEBUG_PRINT("Acc Y: %f\n", sensorData.acc.y);
 
 		%<LibCallModelStep(0)>
 
 
-    l1 = rtY.Log1;
-    l2 = rtY.Log2;
-    l3 = rtY.Log3;
-    l4 = rtY.Log4;
-    l5 = rtY.Log5;
-    l6 = rtY.Log6;
-    m1 = (uint16_t)rtY.Motor_1;
-    m2 = (uint16_t)rtY.Motor_2;
-    m3 = (uint16_t)rtY.Motor_3;
-    m4 = (uint16_t)rtY.Motor_4;
+    l1 = %<mdlName>_Y.Log1;
+    l2 = %<mdlName>_Y.Log2;
+    l3 = %<mdlName>_Y.Log3;
+    l4 = %<mdlName>_Y.Log4;
+    l5 = %<mdlName>_Y.Log5;
+    l6 = %<mdlName>_Y.Log6;
+    m1 = (uint16_t)%<mdlName>_Y.Motor_1;
+    m2 = (uint16_t)%<mdlName>_Y.Motor_2;
+    m3 = (uint16_t)%<mdlName>_Y.Motor_3;
+    m4 = (uint16_t)%<mdlName>_Y.Motor_4;
 
     motorsSetRatio(MOTOR_M1, m1);
     motorsSetRatio(MOTOR_M2, m2);
