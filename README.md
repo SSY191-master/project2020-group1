@@ -1,6 +1,6 @@
 # SSY191 Project
 
-In addition to the original source code for the quadrotor, the folder simulink-model contains the templates for the Simulink and Simscape models that you will use during the course. The contents of this folder is as follows:
+In addition to the original source code for the quadrotor, see src directory, the folder simulink-model contains the templates for the Simulink and Simscape models that you will use during the course. The contents of this folder is as follows:
 
 * closed_loop_script.m -- Script for running tests with Breach. Will be used for automated testing.
 * closed_loop.slx -- Closed loop system. You are not expected to do any changes in this file, in fact it is easier for us to help you if you keep the structure as is.
