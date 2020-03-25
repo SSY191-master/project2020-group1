@@ -18,8 +18,8 @@ parameters
     m = {0.027,'kg'};%Mass
     g = {9.81,'m/s^2'};%Gravity
     d = {0.046,'m'};%Arm length
-    k = {1.9796e-9,'1'};%Lift constant
-    b = {2.5383e-11,'1'};%Drag constant
+    lift = {1.9796e-9,'1'};%Lift constant
+    drag = {2.5383e-11,'1'};%Drag constant
 end
 
 parameters(Access=private)    
