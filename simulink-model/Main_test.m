@@ -4,7 +4,6 @@ load('FlightData.mat')
 alpha = 0.1;
 Ts = 0.01;
 
-
 % Controller gain
 P_gain = 10000;
 
