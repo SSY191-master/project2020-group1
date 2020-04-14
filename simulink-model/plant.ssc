@@ -47,6 +47,9 @@ variables(Access=private)
     % time derivatives of Euler angles
     R_wa = { zeros(3,3), '1' };
     
+    % transformation matrix from body to inertial frame
+    R_ib = { zeros(3,3), '1' };
+    
 end
 
 equations
@@ -85,7 +88,12 @@ equations
     w == R_wa*angle.der;
     
     % Newton-Euler equations
-    
+    R_ib == [cos(angle(2))*cos(angle(3)) sin(angle(1))*sin(angle(2))*cos(angle(3))-cos(angle(1))*sin(angle(3)) cos(angle(1))*sin(angle(2))*cos(angle(3))+sin(angle(1))*sin(angle(3));
+             cos(angle(2))*sin(angle(3)) sin(angle(1))*sin(angle(2))*sin(angle(3))+cos(angle(1))*cos(angle(3)) cos(angle(1))*sin(angle(2))*sin(angle(3))-sin(angle(1))*cos(angle(3));
+             -sin(angle(2))              sin(angle(1))*cos(angle(2))                                           cos(angle(1))*cos(angle(2))];
+             
+    m*a == -[0; 0; mg] + R_ib*[0; 0; ctrl(1)+ctrl(2)+ctrl(3)+ctrl(4)];
+    J*w.der == -cross(w,J*w) + tau;
     
 end
 end

@@ -44,7 +44,11 @@ variables(Access=private)
     tau = { zeros(3,1), 'rad' };
     
     % transformation matrix for expressing angular velocity in
-    % time derivatives f
+    % time derivatives of Euler angles
+    R_wa = { zeros(3,3), '1' };
+    
+    % transformation matrix from body to inertial frame
+    R_ib = { zeros(3,3), '1' };
     
 end
 
@@ -81,9 +85,12 @@ equations
     R_wa == [1 0 -sin(angle(2));
             0 cos(angle(1)) sin(angle(1))*cos(angle(2));
             0 -sin(angle(1)) cos(angle(1))*cos(angle(2))];
-    w == R_wa
+    w == R_wa*angle.der;
     
-    
+    % Newton-Euler equations
+    R_ib == [];
+    m*a == -[0; 0; mg] + R_ib*[0; 0; ctrl(1)+ctrl(2)+ctrl(3)+ctrl(4)];
+    J
     
     
 end
