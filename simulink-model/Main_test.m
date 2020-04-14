@@ -30,4 +30,4 @@ rot_y = [cos(theta) 0 sin(theta);0 1 0; -sin(theta) 0 cos(theta)]
 rot_z = [cos(psi) -sin(psi) 0; sin(psi) cos(psi) 0; 0 0 1]
 
 
-R=simplify(rot_y*rot_x*rot_z)
+R=simplify(rot_x*rot_y*rot_z)
