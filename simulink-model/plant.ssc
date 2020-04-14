@@ -18,8 +18,8 @@ parameters
     m = {0.027,'kg'};%Mass
     g = {9.81,'m/s^2'};%Gravity
     d = {0.046,'m'};%Arm length
-    lift = {1.9796e-9,'1'};%Lift constant
-    drag = {2.5383e-11,'1'};%Drag constant
+    lift = {1.9796e-9,'m*kg'};%Lift constant
+    drag = {2.5383e-11,'m^2*kg'};%Drag constant
 end
 
 parameters(Access=private)    
@@ -38,10 +38,10 @@ variables(Access=private)
     % Add time variant variables here
     
     % torques
-    tau_x = { 0, 'rad' };
-    tau_y = { 0, 'rad' };
-    tau_z = { 0, 'rad' };
-    tau = { zeros(3,1), 'rad' };
+    tau_x = { 0, 'N*m' };
+    tau_y = { 0, 'N*m' };
+    tau_z = { 0, 'N*m' };
+    tau = { zeros(3,1), 'N*m' };
     
     % transformation matrix for expressing angular velocity in
     % time derivatives of Euler angles
@@ -68,7 +68,8 @@ equations
     % torques (ctrl = thrust, b = lift, k = drag) 
     tau_x == (sqrt(2)/2) * d * (ctrl(4) - ctrl(2) - ctrl(1) + ctrl(3));
     tau_y == (sqrt(2)/2) * d * (ctrl(2) - ctrl(4) + ctrl(3) - ctrl(1));
-    tau_z == drag/lift * (-ctrl(1) - ctrl(3) + ctrl(2) + ctrl(4));
+    tau_z == (drag/lift) * (-ctrl(1) - ctrl(3) + ctrl(2) + ctrl(4));
+    % tau_z == (drag/lift);
     
     % torque vector
     tau == [tau_x;
@@ -92,7 +93,7 @@ equations
              cos(angle(2))*sin(angle(3)) sin(angle(1))*sin(angle(2))*sin(angle(3))+cos(angle(1))*cos(angle(3)) cos(angle(1))*sin(angle(2))*sin(angle(3))-sin(angle(1))*cos(angle(3));
              -sin(angle(2))              sin(angle(1))*cos(angle(2))                                           cos(angle(1))*cos(angle(2))];
              
-    m*a == -[0; 0; mg] + R_ib*[0; 0; ctrl(1)+ctrl(2)+ctrl(3)+ctrl(4)];
+    m*a == -[0; 0; m*g] + R_ib*[0; 0; ctrl(1)+ctrl(2)+ctrl(3)+ctrl(4)];
     J*w.der == -cross(w,J*w) + tau;
     
 end
