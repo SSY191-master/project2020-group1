@@ -2,6 +2,7 @@ clear all, clc
 load('FlightData.mat')
 % D:\project1_git\project2020-group1\simulink-model
 
+
 % Complementary filter coefficents
 alpha = 0.1;
 Ts = 0.01;
