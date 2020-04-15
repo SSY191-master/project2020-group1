@@ -19,6 +19,9 @@ parameters
     d = {0.046,'m'};%Arm length
     lift = {1.9796e-9,'1'};%Lift constant b
     drag = {2.5383e-11,'1'};%Drag constant k
+%     lift = {1e-9,'1'};%Lift constant
+%     drag = {2.75e-11,'m'};%Drag constant
+
 end
 
 parameters(Access=private)    
@@ -27,6 +30,11 @@ parameters(Access=private)
     Jy = {1.6993e-5,'kg*m^2'};
     Jz = {2.9944e-5,'kg*m^2'};
     J = [Jx,0,0;0,Jy,0;0,0,Jz];
+%     Jx = {1.395e-5,'kg*m^2'};
+%     Jy = {1.436e-5,'kg*m^2'};
+%     Jz = {2.173e-5,'kg*m^2'};
+%     J = [Jx,0,0;0,Jy,0;0,0,Jz];
+
     
     % Add time invariant parameters here 
     
@@ -73,13 +81,15 @@ equations
     tau == [tau_x;tau_y;tau_z];
     
     % Position, velocity and acceleration
+    % Rxyz = Rotation from bodyframe (airframe) to inertial frame
     m*a == -[0;0;m*g]+Rxyz*[0;0;ctrl(1)+ctrl(2)+ctrl(3)+ctrl(4)]; % SIGN ON THIS!? HOW SHOULD THE Rxyz BE? 
     v.der == a;     
     pos.der == v;
     
     % Rotational acceleration
-    J*w.der == cross(-w,J*w) + tau;
-    
+    J*w_airframe.der == cross(-w_airframe,J*w_airframe) + tau;
+%      J*w.der == cross(-w,J*w) + tau;
+
     % Euler angles
     angle == [phi;theta;psi];
     
@@ -87,16 +97,22 @@ equations
     rot_x == [1, 0, 0;0, cos(phi), -sin(phi);0, sin(phi), cos(phi)];
     rot_y == [cos(theta), 0, sin(theta);0, 1, 0; -sin(theta), 0, cos(theta)];
     rot_z == [cos(psi), -sin(psi), 0; sin(psi), cos(psi), 0;0, 0, 1];
+%     Rxyz == rot_z*rot_y*rot_x;
     Rxyz == rot_x*rot_y*rot_z;
-
+  
     % Angular velocity in euler angles, with w translated into the airframe, w_airframe. See book p 150.
-    w_airframe == Rxyz'*w;
-    angle.der == angle_der;
-    w_airframe == T*angle_der;
+    % Rxyz = Rotation from bodyframe (airframe) to inertial frame
+%     w == Rxyz*w_airframe;
     
-%     T == [cos(theta)*cos(psi), sin(psi), 0;
-%       -cos(theta)*sin(psi), cos(psi), 0;
-%       sin(theta),0,1]; % code generated
+    angle.der == angle_der;
+%     w_airframe == T*angle_der;
+     w_airframe == angle_der;
+     w == w_airframe;
+                                
+%     
+%     T == [1,0,  sin(theta);
+%          0 cos(phi) -cos(theta)*sin(phi);
+%           0 sin(phi) cos(theta)*cos(phi)];
 
 % https://andrew.gibiansky.com/downloads/pdf/Quadcopter%20Dynamics,%20Simulation,%20and%20Control.pdf
     T == [1 0 -sin(theta);
