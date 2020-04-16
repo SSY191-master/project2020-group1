@@ -10,16 +10,7 @@ Ts = 0.01;
 % Controller gain
 P_gain = 40000;
 
-
-
-
-
-
-
-
-
-
-
+%%
 % Angles for acceleration
 % phi_a = atan2(fby,fbz);
 % theta_a = atan2(-fbx,sqrt((fby)^2+(fbz)^2));

@@ -17,8 +17,11 @@ parameters
     m = {0.027,'kg'};%Mass
     g = {9.81,'m/s^2'};%Gravity
     d = {0.046,'m'};%Arm length
-%     lift = {1.9796e-9,'1'};%Lift constant b
-%     drag = {2.5383e-11,'1'};%Drag constant k
+    lift = {1.9796e-9,'1'};%Lift constant
+    drag = {2.5383e-11,'m'};%Drag constant
+    
+%     k = {2.5383e-11,'1'}; %Lift constant
+%     b = {1.9796e-9,'1'};  %Drag constant
 end
 
 parameters(Access=private)
@@ -29,8 +32,7 @@ parameters(Access=private)
     J = [Jx,0,0;0,Jy,0;0,0,Jz];
     
     % Add time invariant parameters here 
-    k = {1e-9,'1'};%Lift constant
-    b = {2.75e-11,'m'};%Drag constant
+
 end
 
 variables(Access=private)
@@ -64,7 +66,7 @@ equations
     % Torques, ctrl = Thrust (T). drag = k, lift = b. d = Length to the rotors from center of copter.
     tau_x == d*sin(pi/4)*(ctrl(4)+ctrl(3)-ctrl(1)-ctrl(2)); % sin(pi/4) because x is in between motor 1 & 4
     tau_y == d*sin(pi/4)*(ctrl(3)+ctrl(2)-ctrl(4)-ctrl(1));  % sin(pi/4) because y is in between motor 4 & 3
-    tau_z == (b/k)*(-ctrl(1)-ctrl(3)+ctrl(4)+ctrl(2));
+    tau_z == (drag/lift)*(-ctrl(1)-ctrl(3)+ctrl(4)+ctrl(2));
     tau == [tau_x;tau_y;tau_z];
     
     % Position, velocity and acceleration
@@ -94,5 +96,6 @@ equations
     % Angular velocity 
     w == angle_der;
 
+    
 end
 end
