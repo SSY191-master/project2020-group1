@@ -56,17 +56,42 @@ C = [1 0 0 0 0 0;
  
 D = zeros(2,4);
 
+% h=Ts;
+% sys = ss(A,B,C,D);
+% sysd = c2d(sys,Ts,'zoh');
+% Ad = sysd.A;
+% Bd = sysd.B*0.06/4*g/65536;
+% Cd = sysd.C;
+% Dd = sysd.D;
+
 Ad = expm(A*Ts);
-Bd = (pinv(A)*expm(A*Ts)*B-pinv(A)*B); % Add this: *0.06/4*g/65536 : And remove 
+Bd = (pinv(A)*expm(A*Ts)*B-pinv(A)*B)*0.06/4*g/65536;
+
+% sysd2=ss(Ad,Bd,Cd,Dd);
 
 Cdnew = [1 0 0 0 0 0;
          0 1 0 0 0 0];
 
-Qx = 10*diag([1 1 1 1 1 1]);    % Tune these
-Qu = 10*diag([1 1 1 1]);        % Tune these
+Qx = 10*diag([1 1 1 1 1 1]);   
+Qu = 10*diag([1 1 1 1]);
 
 Klqr = dlqr(Ad,Bd,Qx,Qu)
+% [~,Klqr,~] = idare(Ad,Bd,Qx,Qu)
 
-Klqr = [Klqr(:,1:2) Klqr(:,4:end)]
+% Klqr = Klqr(:,1:3)
 
 'done'
+
+
+% AI = [Ad zeros(6,2); 
+%     -Cdnew ones(2,2)];
+
+% BI = [Bd; zeros(2,4)];
+% 
+% Q_xI = 10000*diag([1 1 1 1 1 1 1 1]);
+% Q_uI = 100*diag([1 1 1 1]);
+% [~,K,~] = idare(AI,BI,Q_xI,Q_uI);
+% K = dlqr(AI,BI,Q_xI,Q_uI);
+% 
+% K_I = [K(:,4:6)]
+% K = K(:,1:3)
