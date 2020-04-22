@@ -43,6 +43,8 @@ J3_3 = J(3,3);
 dphi = 0 %omega(1);
 dtheta = 0 %omega(2);
 dpsi = 0 %omega(3);
+
+
 %%
 
 A = [0     0     0     1     0     0;

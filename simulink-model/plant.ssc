@@ -70,9 +70,10 @@ equations
     tau == [tau_x;tau_y;tau_z];
     
     % Position, velocity and acceleration
-    m*a == -[0;0;m*g]+Rxyz*[0;0;sum(ctrl)]; % SIGN ON THIS!? HOW SHOULD THE Rxyz BE? 
+%     m*a == -[0;0;m*g]+Rxyz*[0;0;sum(ctrl)]; 
     v.der == a;
     pos.der == v;
+    a == 0;
     
     % Rotational acceleration
     J*w.der == cross(-w,J*w) + tau;
