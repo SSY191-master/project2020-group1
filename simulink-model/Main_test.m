@@ -39,9 +39,9 @@ Bd = (pinv(A)*expm(A*Ts)*B-pinv(A)*B)*0.06/4*g/65536;
 Cdnew = [1 0 0 0 0 0;
          0 1 0 0 0 0];
 
-% Qu = diag([100 1 100 1]);        % Tune these
-Qx = diag([1000 1000 1 10 10 10])*10;    % Tune these
-Qu = 0.5;        % Tune these
+Qx = diag([100 100 1 10 10 10])*10;    % Tune these
+Qu = 0.1*eye(4);        % Tune these
+
 
 Klqr = dlqr(Ad,Bd,Qx,Qu);   
 Klqr = [Klqr(:,1:2) Klqr(:,4:end)] % Only use phi, theta, wx, wy and wz.
