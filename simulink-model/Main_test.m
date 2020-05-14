@@ -3,7 +3,7 @@ load('FlightData.mat')
 
 %% LQ controller
 clear all, clc, close all
-cd D:\project1_git\project2020-group1\simulink-model
+% cd D:\project1_git\project2020-group1\simulink-model
 load('FlightData.mat')
 
 % Complementary filter coefficents
