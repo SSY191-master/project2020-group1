@@ -30,7 +30,7 @@ A = [0     0     0     1     0     0;
               -2.6045    2.6045   -2.6045    2.6045];
 
 C = [1 0 0 0 0 0;
-     0 1 0 0 0 0]; 
+     0 1 0 0 0 0];
 D = zeros(2,4);
 
 Ad = expm(A*Ts);
@@ -43,7 +43,7 @@ Qx = diag([100 100 1 10 10 10])*10;    % Tune these
 Qu = 0.1*eye(4);        % Tune these
 
 
-Klqr = dlqr(Ad,Bd,Qx,Qu);   
+Klqr = dlqr(Ad,Bd,Qx,Qu);
 Klqr = [Klqr(:,1:2) Klqr(:,4:end)] % Only use phi, theta, wx, wy and wz.
 
 'done'
